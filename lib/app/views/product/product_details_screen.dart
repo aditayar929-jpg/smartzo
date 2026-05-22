@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:carousel_slider/carousel_slider.dart';
+
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../theme/app_colors.dart';
@@ -136,22 +136,18 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 flexibleSpace: FlexibleSpaceBar(
                   background: Stack(
                     children: [
-                      CarouselSlider.builder(
+                      PageView.builder(
                         itemCount: product.images.length,
-                        itemBuilder: (context, index, realIndex) {
+                        onPageChanged: (index) {
+                          setState(() => _currentImageIndex = index);
+                        },
+                        itemBuilder: (context, index) {
                           return CachedNetworkImage(
                             imageUrl: product.images[index],
                             fit: BoxFit.cover,
                             width: double.infinity,
                           );
                         },
-                        options: CarouselOptions(
-                          height: 400,
-                          viewportFraction: 1,
-                          onPageChanged: (index, reason) {
-                            setState(() => _currentImageIndex = index);
-                          },
-                        ),
                       ),
                       Positioned(
                         bottom: 20,
