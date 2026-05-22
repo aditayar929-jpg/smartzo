@@ -47,7 +47,7 @@ dependencies:
   url_launcher: ^6.2.2
   share_plus: ^7.2.1
   connectivity_plus: ^5.0.2
-  flutter_local_notifications: ^16.3.2
+  # flutter_local_notifications: ^17.0.0  # Will add later
 
   # Auth
   google_sign_in: ^6.2.1
