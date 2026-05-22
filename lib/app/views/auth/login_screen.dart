@@ -219,6 +219,22 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 16),
+
+                // Guest Login
+                Center(
+                  child: TextButton(
+                    onPressed: () => _authController.continueAsGuest(),
+                    child: const Text(
+                      'Continue as Guest',
+                      style: TextStyle(
+                        color: AppColors.grey,
+                        fontSize: 15,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 24),
               ],
             ),

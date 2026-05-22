@@ -35,6 +35,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   void _handleRegister() {
     if (_formKey.currentState!.validate()) {
+      if (_passwordController.text != _confirmPasswordController.text) {
+        Get.snackbar('Error', 'Passwords do not match');
+        return;
+      }
       _authController.register(
         _firstNameController.text.trim(),
         _lastNameController.text.trim(),

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../theme/app_colors.dart';
 import '../../controllers/product_controller.dart';
 import '../../controllers/cart_controller.dart';
+import '../../controllers/auth_controller.dart';
 import '../../routes/app_routes.dart';
 import 'widgets/banner_slider.dart';
 import 'widgets/category_list.dart';
@@ -18,6 +19,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final _productController = Get.put(ProductController());
   final _cartController = Get.find<CartController>();
+  final _authController = Get.find<AuthController>();
   int _currentNavIndex = 0;
 
   @override
@@ -84,6 +86,55 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               // Banner Slider
               const BannerSlider(),
+              const SizedBox(height: 16),
+
+              // Guest Login Banner
+              Obx(() => _authController.isGuest.value
+                ? Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.person_outline, color: AppColors.primary),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Browsing as Guest',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Login to track orders & save wishlist',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.grey,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            _authController.logout();
+                          },
+                          child: const Text('Login'),
+                        ),
+                      ],
+                    ),
+                  )
+                : const SizedBox.shrink(),
+              ),
               const SizedBox(height: 24),
 
               // Categories

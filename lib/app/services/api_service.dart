@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'dart:convert';
 import '../utils/constants.dart';
 
 class ApiService {
@@ -61,16 +62,50 @@ class ApiService {
     });
   }
 
-  // Authentication
-  Future<Response> login(String username, String password) async {
-    return _dio.post(
-      '${AppConstants.authUrl}/token',
-      data: {'username': username, 'password': password},
-      options: Options(extra: {'noAuth': true}),
-    );
+  // Authentication - Customer lookup by email
+  Future<Response> getCustomersByEmail(String email) async {
+    return _dio.get('/customers', queryParameters: {'email': email});
   }
 
-  Future<Response> register(Map<String, dynamic> data) async {
+  // Verify customer password via WordPress REST API
+  Future<Response> verifyCustomerPassword(int customerId, String password) async {
+    try {
+      // Try WordPress REST API with application passwords
+      final wpUrl = AppConstants.baseUrl.replaceAll('/wp-json/wc/v3', '');
+      final response = await Dio().get(
+        '$wpUrl/wp-json/wp/v2/users/me',
+        options: Options(
+          headers: {
+            'Authorization': 'Basic ${base64Encode(utf8.encode('$customerId:$password'))}',
+          },
+          validateStatus: (status) => status! < 500,
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        return Response(
+          requestOptions: RequestOptions(path: ''),
+          statusCode: 200,
+          data: {'valid': true},
+        );
+      }
+
+      return Response(
+        requestOptions: RequestOptions(path: ''),
+        statusCode: 401,
+        data: {'valid': false},
+      );
+    } catch (e) {
+      return Response(
+        requestOptions: RequestOptions(path: ''),
+        statusCode: 401,
+        data: {'valid': false, 'error': e.toString()},
+      );
+    }
+  }
+
+  // Create customer
+  Future<Response> createCustomer(Map<String, dynamic> data) async {
     return _dio.post('/customers', data: data);
   }
 

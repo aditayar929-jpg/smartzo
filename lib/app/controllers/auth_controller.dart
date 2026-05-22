@@ -9,6 +9,7 @@ class AuthController extends GetxController {
   final isLoading = false.obs;
   final user = Rxn<User>();
   final isLoggedIn = false.obs;
+  final isGuest = false.obs;
 
   @override
   void onInit() {
@@ -28,14 +29,29 @@ class AuthController extends GetxController {
   Future<bool> login(String email, String password) async {
     try {
       isLoading.value = true;
-      final response = await _api.login(email, password);
-      if (response.statusCode == 200) {
-        final token = response.data['token'];
-        await StorageService.saveToken(token);
-        // Fetch user data
-        final userResponse = await _api.getCustomer(response.data['user_id']);
-        if (userResponse.statusCode == 200) {
-          user.value = User.fromJson(userResponse.data);
+
+      // Step 1: Find customer by email
+      final searchResponse = await _api.getCustomersByEmail(email);
+
+      if (searchResponse.statusCode == 200) {
+        final customers = searchResponse.data as List;
+
+        if (customers.isEmpty) {
+          Get.snackbar('Error', 'No account found with this email');
+          return false;
+        }
+
+        final customer = customers[0];
+
+        // Step 2: Verify password using WordPress REST API
+        final verifyResponse = await _api.verifyCustomerPassword(
+          customer['id'],
+          password,
+        );
+
+        if (verifyResponse.statusCode == 200 && verifyResponse.data['valid'] == true) {
+          // Login successful
+          user.value = User.fromJson(customer);
           user.value = User(
             id: user.value!.id,
             email: user.value!.email,
@@ -43,15 +59,22 @@ class AuthController extends GetxController {
             lastName: user.value!.lastName,
             avatar: user.value!.avatar,
             phone: user.value!.phone,
-            token: token,
+            token: 'wc_auth_${customer['id']}',
           );
+          await StorageService.saveToken(user.value!.token!);
           await StorageService.saveUser(user.value!.toJson());
           isLoggedIn.value = true;
+          isGuest.value = false;
           Get.offAllNamed(AppRoutes.home);
           return true;
+        } else {
+          Get.snackbar('Error', 'Invalid password. Make sure you have JWT Auth plugin installed on your WooCommerce site.');
+          return false;
         }
+      } else {
+        Get.snackbar('Error', 'Login failed. Please try again.');
+        return false;
       }
-      return false;
     } catch (e) {
       Get.snackbar('Error', 'Login failed: ${e.toString()}');
       return false;
@@ -63,19 +86,25 @@ class AuthController extends GetxController {
   Future<bool> register(String firstName, String lastName, String email, String password) async {
     try {
       isLoading.value = true;
-      final response = await _api.register({
+
+      // Create customer via WooCommerce REST API
+      final response = await _api.createCustomer({
         'first_name': firstName,
         'last_name': lastName,
         'email': email,
         'username': email,
         'password': password,
       });
-      if (response.statusCode == 201) {
-        Get.snackbar('Success', 'Registration successful! Please login.');
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        Get.snackbar('Success', 'Account created! Please login.');
         Get.offNamed(AppRoutes.login);
         return true;
+      } else {
+        final errorMsg = response.data?['message'] ?? 'Registration failed';
+        Get.snackbar('Error', errorMsg);
+        return false;
       }
-      return false;
     } catch (e) {
       Get.snackbar('Error', 'Registration failed: ${e.toString()}');
       return false;
@@ -84,13 +113,22 @@ class AuthController extends GetxController {
     }
   }
 
+  void continueAsGuest() {
+    isGuest.value = true;
+    isLoggedIn.value = false;
+    user.value = null;
+    Get.offAllNamed(AppRoutes.home);
+  }
+
   Future<void> logout() async {
     await StorageService.removeToken();
     await StorageService.removeUser();
     user.value = null;
     isLoggedIn.value = false;
+    isGuest.value = false;
     Get.offAllNamed(AppRoutes.login);
   }
 
   bool get isAuthenticated => isLoggedIn.value && user.value != null;
+  bool get canShop => isAuthenticated || isGuest.value;
 }
