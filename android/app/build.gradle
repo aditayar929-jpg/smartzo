@@ -54,6 +54,10 @@ android {
             signingConfig signingConfigs.debug
             minifyEnabled true
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+            // Disable R8 missing class errors for Play Core
+            lintOptions {
+                disable 'InvalidPackage'
+            }
         }
     }
 }
