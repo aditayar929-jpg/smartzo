@@ -16,9 +16,15 @@ class ProductController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    fetchCategories();
-    fetchFeaturedProducts();
-    fetchProducts();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    await Future.wait([
+      fetchCategories(),
+      fetchFeaturedProducts(),
+      fetchProducts(),
+    ]);
   }
 
   Future<void> fetchProducts({bool refresh = false}) async {
@@ -42,20 +48,29 @@ class ProductController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        final List<Product> newProducts =
-            (response.data as List).map((e) => Product.fromJson(e)).toList();
-        if (newProducts.length < 20) {
-          hasMore.value = false;
+        final data = response.data;
+        if (data is List) {
+          final List<Product> newProducts = [];
+          for (var item in data) {
+            try {
+              newProducts.add(Product.fromJson(item));
+            } catch (e) {
+              print('Product parse error: $e');
+            }
+          }
+          if (newProducts.length < 20) {
+            hasMore.value = false;
+          }
+          if (currentPage.value == 1) {
+            products.value = newProducts;
+          } else {
+            products.addAll(newProducts);
+          }
+          currentPage.value++;
         }
-        if (currentPage.value == 1) {
-          products.value = newProducts;
-        } else {
-          products.addAll(newProducts);
-        }
-        currentPage.value++;
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to load products');
+      print('Product fetch error: $e');
     } finally {
       isLoading.value = false;
       isLoadingMore.value = false;
@@ -65,21 +80,25 @@ class ProductController extends GetxController {
   Future<void> fetchFeaturedProducts() async {
     try {
       final response = await _api.getFeaturedProducts();
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 && response.data is List) {
         featuredProducts.value =
             (response.data as List).map((e) => Product.fromJson(e)).toList();
       }
-    } catch (_) {}
+    } catch (e) {
+      print('Featured products error: $e');
+    }
   }
 
   Future<void> fetchCategories() async {
     try {
       final response = await _api.getCategories();
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 && response.data is List) {
         categories.value =
             (response.data as List).map((e) => Category.fromJson(e)).toList();
       }
-    } catch (_) {}
+    } catch (e) {
+      print('Categories error: $e');
+    }
   }
 
   Future<Product?> fetchProductDetails(int id) async {
