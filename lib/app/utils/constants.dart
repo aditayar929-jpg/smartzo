@@ -1,9 +1,9 @@
 class AppConstants {
   // WooCommerce API Keys - CHANGE THESE
-  static const String baseUrl = 'https://your-woo-commerce-site.com/wp-json/wc/v3';
-  static const String authUrl = 'https://your-woo-commerce-site.com/wp-json/jwt-auth/v1';
-  static const String consumerKey = 'YOUR_CONSUMER_KEY';
-  static const String consumerSecret = 'YOUR_CONSUMER_SECRET';
+  static const String baseUrl = 'https://smartzo.shop/wp-json/wc/v3';
+  static const String authUrl = 'https://smartzo.shop/wp-json/jwt-auth/v1';
+  static const String consumerKey = 'ck_3bbfc8bf49901fa8074999b45da2781a37d34ce3';
+  static const String consumerSecret = 'cs_2936c22fce485301ee0f4e6b949a26bd325c4541';
 
   // App Info
   static const String appName = 'Smartzo';
