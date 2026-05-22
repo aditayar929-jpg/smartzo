@@ -6,6 +6,7 @@ import 'app/routes/app_pages.dart';
 import 'app/routes/app_routes.dart';
 import 'app/theme/app_theme.dart';
 import 'app/services/storage_service.dart';
+import 'app/bindings/initial_binding.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,6 +46,7 @@ class SmartzoApp extends StatelessWidget {
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.light,
       initialRoute: AppRoutes.splash,
+      initialBinding: InitialBinding(),
       getPages: AppPages.pages,
       defaultTransition: Transition.fadeIn,
     );
