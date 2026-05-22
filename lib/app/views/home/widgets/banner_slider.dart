@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:carousel_slider/carousel_slider.dart';
+import 'dart:async';
 import '../../../theme/app_colors.dart';
 
 class BannerSlider extends StatefulWidget {
@@ -11,6 +11,8 @@ class BannerSlider extends StatefulWidget {
 
 class _BannerSliderState extends State<BannerSlider> {
   int _currentIndex = 0;
+  final PageController _pageController = PageController(viewportFraction: 0.92);
+  Timer? _autoPlayTimer;
 
   final List<BannerItem> _banners = [
     BannerItem(
@@ -34,91 +36,110 @@ class _BannerSliderState extends State<BannerSlider> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _autoPlayTimer = Timer.periodic(const Duration(seconds: 4), (timer) {
+      if (_pageController.hasClients) {
+        final next = (_currentIndex + 1) % _banners.length;
+        _pageController.animateToPage(
+          next,
+          duration: const Duration(milliseconds: 400),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _autoPlayTimer?.cancel();
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        CarouselSlider.builder(
-          itemCount: _banners.length,
-          itemBuilder: (context, index, realIndex) {
-            final banner = _banners[index];
-            return Container(
-              width: double.infinity,
-              margin: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [banner.color, banner.color.withOpacity(0.8)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Stack(
-                children: [
-                  Positioned(
-                    right: 20,
-                    top: 20,
-                    bottom: 20,
-                    child: Icon(
-                      banner.icon,
-                      size: 80,
-                      color: AppColors.white.withOpacity(0.2),
-                    ),
+        SizedBox(
+          height: 180,
+          child: PageView.builder(
+            controller: _pageController,
+            itemCount: _banners.length,
+            onPageChanged: (index) {
+              setState(() => _currentIndex = index);
+            },
+            itemBuilder: (context, index) {
+              final banner = _banners[index];
+              return Container(
+                width: double.infinity,
+                margin: const EdgeInsets.symmetric(horizontal: 6),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [banner.color, banner.color.withOpacity(0.8)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          banner.title,
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          banner.subtitle,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: AppColors.white.withOpacity(0.9),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 10,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.white,
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                          child: Text(
-                            'Shop Now',
-                            style: TextStyle(
-                              color: banner.color,
-                              fontWeight: FontWeight.w600,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Stack(
+                  children: [
+                    Positioned(
+                      right: 20,
+                      top: 20,
+                      bottom: 20,
+                      child: Icon(
+                        banner.icon,
+                        size: 80,
+                        color: AppColors.white.withOpacity(0.2),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            banner.title,
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.white,
                             ),
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 8),
+                          Text(
+                            banner.subtitle,
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: AppColors.white.withOpacity(0.9),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 10,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.white,
+                              borderRadius: BorderRadius.circular(25),
+                            ),
+                            child: Text(
+                              'Shop Now',
+                              style: TextStyle(
+                                color: banner.color,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            );
-          },
-          options: CarouselOptions(
-            height: 180,
-            autoPlay: true,
-            autoPlayInterval: const Duration(seconds: 4),
-            enlargeCenterPage: true,
-            viewportFraction: 1,
-            onPageChanged: (index, reason) {
-              setState(() => _currentIndex = index);
+                  ],
+                ),
+              );
             },
           ),
         ),

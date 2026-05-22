@@ -73,7 +73,7 @@ class CartController extends GetxController {
   double get subtotal =>
       items.fold(0, (sum, item) => sum + item.totalPrice);
 
-  double get total => subtotal - discount;
+  double get total => subtotal - discount.value;
 
   int get totalItems =>
       items.fold(0, (sum, item) => sum + item.quantity);

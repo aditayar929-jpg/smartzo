@@ -128,7 +128,7 @@ class CouponsScreen extends StatelessWidget {
                 const Divider(height: 1),
                 InkWell(
                   onTap: () {
-                    Clipboard.setData(CopyData(text: coupon['code']!));
+                    Clipboard.setData(ClipboardData(text: coupon['code']!));
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('Coupon code copied!'),
@@ -161,9 +161,4 @@ class CouponsScreen extends StatelessWidget {
       ),
     );
   }
-}
-
-class CopyData {
-  final String text;
-  CopyData({required this.text});
 }

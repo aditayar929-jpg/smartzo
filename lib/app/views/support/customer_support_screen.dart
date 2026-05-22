@@ -90,7 +90,7 @@ class CustomerSupportScreen extends StatelessWidget {
               onTap: () {},
             ),
             _buildContactOption(
-              icon: Icons.whatsapp,
+              icon: Icons.chat_bubble,
               title: 'WhatsApp',
               subtitle: 'Message us on WhatsApp',
               onTap: () => _launchUrl('https://wa.me/911234567890'),

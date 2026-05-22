@@ -17,13 +17,13 @@ dependencies:
   dio: ^5.4.0
 
   # Storage
-  shared_preferences: ^2.2.2
+  shared_preferences: ^2.3.0
   hive: ^2.2.3
   hive_flutter: ^1.1.0
 
   # Image
   cached_network_image: ^3.3.1
-  carousel_slider: ^4.2.1
+  # carousel_slider removed - incompatible with Flutter 3.24
   image_picker: ^1.0.7
 
   # UI

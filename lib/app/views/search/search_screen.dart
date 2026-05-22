@@ -105,7 +105,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         child: Chip(
                           label: Text(search),
                           deleteIcon: const Icon(Icons.close, size: 18),
-                          onDelete: () => _recentSearches.remove(search),
+                          onDeleted: () => _recentSearches.remove(search),
                         ),
                       );
                     }).toList(),
