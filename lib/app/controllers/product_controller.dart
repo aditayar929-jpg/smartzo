@@ -102,6 +102,13 @@ class ProductController extends GetxController {
     fetchProducts(refresh: true);
   }
 
+  void clearFilter() {
+    if (selectedCategory.value.isNotEmpty) {
+      selectedCategory.value = '';
+      fetchProducts(refresh: true);
+    }
+  }
+
   Future<void> searchProducts(String query) async {
     try {
       isLoading.value = true;

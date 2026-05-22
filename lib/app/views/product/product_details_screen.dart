@@ -9,6 +9,7 @@ import '../../controllers/product_controller.dart';
 import '../../controllers/cart_controller.dart';
 import '../../controllers/wishlist_controller.dart';
 import '../../models/cart_model.dart';
+import '../../models/product_model.dart';
 import '../../routes/app_routes.dart';
 import '../../utils/helpers.dart';
 
@@ -26,6 +27,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   int _currentImageIndex = 0;
   int _quantity = 1;
   Map<String, String> _selectedVariations = {};
+  Product? _product;
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +60,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             );
           }
 
-          final product = snapshot.data!;
+          _product = snapshot.data!;
+          final product = _product!;
 
           return CustomScrollView(
             slivers: [
@@ -550,63 +553,71 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           );
         },
       ),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, -5),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            // Add to Cart
-            Expanded(
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  _cartController.addItem(CartItem(
-                    productId: productId,
-                    name: 'Product',
-                    price: 0,
-                    quantity: _quantity,
-                    selectedVariations: _selectedVariations,
-                  ));
-                },
-                icon: const Icon(Icons.shopping_cart),
-                label: const Text('Add to Cart'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
+      bottomNavigationBar: _product == null
+          ? null
+          : Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, -5),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  // Add to Cart
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        _cartController.addItem(CartItem(
+                          productId: _product!.id,
+                          name: _product!.name,
+                          image: _product!.image,
+                          price: double.tryParse(_product!.price) ?? 0,
+                          quantity: _quantity,
+                          variationId: _selectedVariations.isNotEmpty ? _selectedVariations.toString() : null,
+                          selectedVariations: _selectedVariations,
+                        ));
+                        Get.snackbar('Added', '${_product!.name} added to cart',
+                            snackPosition: SnackPosition.BOTTOM);
+                      },
+                      icon: const Icon(Icons.shopping_cart),
+                      label: const Text('Add to Cart'),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  // Buy Now
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _cartController.addItem(CartItem(
+                          productId: _product!.id,
+                          name: _product!.name,
+                          image: _product!.image,
+                          price: double.tryParse(_product!.price) ?? 0,
+                          quantity: _quantity,
+                          variationId: _selectedVariations.isNotEmpty ? _selectedVariations.toString() : null,
+                          selectedVariations: _selectedVariations,
+                        ));
+                        Get.toNamed(AppRoutes.checkout);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.accent,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                      child: const Text('Buy Now'),
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(width: 12),
-            // Buy Now
-            Expanded(
-              child: ElevatedButton(
-                onPressed: () {
-                  _cartController.addItem(CartItem(
-                    productId: productId,
-                    name: 'Product',
-                    price: 0,
-                    quantity: _quantity,
-                    selectedVariations: _selectedVariations,
-                  ));
-                  Get.toNamed(AppRoutes.checkout);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.accent,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                child: const Text('Buy Now'),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 

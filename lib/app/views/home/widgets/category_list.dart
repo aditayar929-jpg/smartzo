@@ -58,8 +58,10 @@ class CategoryList extends StatelessWidget {
             final category = controller.categories[index];
             return GestureDetector(
               onTap: () {
-                controller.filterByCategory(category.id.toString());
-                Get.toNamed(AppRoutes.productList, arguments: category.name);
+                Get.toNamed(
+                  AppRoutes.productList,
+                  arguments: {'id': category.id.toString(), 'name': category.name},
+                );
               },
               child: Container(
                 width: 80,

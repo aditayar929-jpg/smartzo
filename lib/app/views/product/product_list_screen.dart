@@ -14,7 +14,29 @@ class ProductListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.find<ProductController>();
     final wishlistController = Get.find<WishlistController>();
-    final String? categoryName = Get.arguments;
+
+    // Handle arguments - can be String (name) or Map (id + name)
+    final args = Get.arguments;
+    String? categoryName;
+    String? categoryId;
+
+    if (args is Map) {
+      categoryId = args['id']?.toString();
+      categoryName = args['name']?.toString();
+    } else if (args is String) {
+      categoryName = args;
+    }
+
+    // Filter by category when screen opens
+    if (categoryId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        controller.filterByCategory(categoryId!);
+      });
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        controller.clearFilter();
+      });
+    }
 
     return Scaffold(
       backgroundColor: AppColors.white,
